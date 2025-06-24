@@ -1,10 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using CineAtom.WebApi.Data;
+using CineAtom.WebApi.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<CineAtomDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddHttpClient<PeliculasController>();
 
 
 // Add services to the container.

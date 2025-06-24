@@ -187,7 +187,7 @@ namespace CineAtom.WebApi.Controllers
 
                 await connection.OpenAsync();
 
-                using var command = connection.CreateCommand();
+                var command = connection.CreateCommand();
 
                 command.CommandText = "usp_CineAtom_Articulo_Update";
                 command.CommandType = CommandType.StoredProcedure;
@@ -257,7 +257,7 @@ namespace CineAtom.WebApi.Controllers
                 return BadRequest(new
                 {
                     success = false,
-                    message = "No se puede actualizar el artículo.",
+                    message = "No se puede actualizar el artículo, error con la base de datos.",
                     detail = ex.Message
                 });
             }
