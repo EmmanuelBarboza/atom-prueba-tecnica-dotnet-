@@ -4,6 +4,7 @@ using CineAtom.WebApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace CineAtom.WebApi.Controllers
 {
@@ -167,6 +168,192 @@ namespace CineAtom.WebApi.Controllers
                 });
             }
         }
+
+        [HttpPut("Actualizar/{id}")]
+        public async Task<IActionResult> Actualizar(int id, [FromBody] UpdateArticuloDTO dto)
+        {
+            try
+            {
+                if (dto == null)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "El objeto enviado es nulo."
+                    });
+                }
+
+                var connection = _context.Database.GetDbConnection();
+
+                await connection.OpenAsync();
+
+                using var command = connection.CreateCommand();
+
+                command.CommandText = "usp_CineAtom_Articulo_Update";
+                command.CommandType = CommandType.StoredProcedure;
+
+                command.Parameters.Add(new SqlParameter("@ArticuloId", SqlDbType.Int)
+                {
+                    Value = id
+                });
+                command.Parameters.Add(new SqlParameter("@Nombre", SqlDbType.NVarChar, 100)
+                {
+                    Value = dto.Nombre
+                });
+                command.Parameters.Add(new SqlParameter("@Descripcion", SqlDbType.NVarChar, 255)
+                {
+                    Value = dto.Descripcion
+                });
+                command.Parameters.Add(new SqlParameter("@Cantidad", SqlDbType.Int)
+                {
+                    Value = dto.Cantidad
+                });
+                command.Parameters.Add(new SqlParameter("@Precio", SqlDbType.Decimal)
+                {
+                    Value = dto.Precio
+                });
+                command.Parameters.Add(new SqlParameter("@CategoriaId", SqlDbType.Int)
+                {
+                    Value = dto.CategoriaId
+                });
+
+                var returnParameter = new SqlParameter("@ReturnVal", SqlDbType.Int)
+                {
+                    Direction = ParameterDirection.ReturnValue
+                };
+                command.Parameters.Add(returnParameter);
+
+                await command.ExecuteNonQueryAsync();
+
+                var result = (int) returnParameter.Value;
+
+                if (result == 0)
+                {
+                    return Ok(new
+                    {
+                        success = true,
+                        message = "Artículo actualizado correctamente."
+                    });
+                }
+                else if (result == -2)
+                {
+                    return NotFound(new
+                    {
+                        success = false,
+                        message = $"No existe un artículo con ID {id}."
+                    });
+                }
+                else
+                {
+                    return StatusCode(500, new
+                    {
+                        success = false,
+                        message = "Error desconocido al actualizar el artículo."
+                    });
+                }
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "No se puede actualizar el artículo.",
+                    detail = ex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Error inesperado al actualizar el artículo.",
+                    detail = ex.Message
+                });
+            }
+        }
+
+
+
+        [HttpDelete("Eliminar/{id}")]
+        public async Task<IActionResult> Eliminar(int id)
+        {
+            try
+            {
+                var connection = _context.Database.GetDbConnection();
+
+                await connection.OpenAsync();
+
+                var command = connection.CreateCommand();
+
+                command.CommandText = "usp_CineAtom_Articulo_Delete";
+                command.CommandType = CommandType.StoredProcedure;
+
+                command.Parameters.Add(new SqlParameter("@ArticuloId", SqlDbType.Int) { Value = id });
+
+                var returnParameter = new SqlParameter("@ReturnVal", SqlDbType.Int)
+                {
+                    Direction = ParameterDirection.ReturnValue
+                };
+
+                command.Parameters.Add(returnParameter);
+
+                await command.ExecuteNonQueryAsync();
+
+                var result = (int)returnParameter.Value;
+
+                if (result == 0)
+                {
+                    return Ok(new
+                    {
+                        success = true,
+                        message = "Artículo eliminado correctamente."
+                    });
+                }
+                else if (result == -1)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "No se puede eliminar un artículo con cantidad mayor a cero."
+                    });
+                }
+                else if (result == -2)
+                {
+                    return NotFound(new
+                    {
+                        success = false,
+                        message = $"No existe un artículo con ID {id}."
+                    });
+                }
+                else
+                {
+                    return StatusCode(500, new
+                    {
+                        success = false,
+                        message = "Error desconocido al eliminar el artículo."
+                    });
+                }
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "No se puede eliminar el artículo.",
+                    detail = ex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Error inesperado al eliminar el artículo.",
+                    detail = ex.Message
+                });
+            }
+        }
+
 
 
 
