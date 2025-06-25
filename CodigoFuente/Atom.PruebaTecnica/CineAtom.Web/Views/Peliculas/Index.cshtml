@@ -1,82 +1,234 @@
-﻿@model CineAtom.Web.DTOs.Pelicula.OMDbSearchResponseDTO
+﻿@model CineAtom.Web.Data.Paginacion<CineAtom.Web.DTOs.Pelicula.PeliculaDTO>
 
 @{
     ViewData["Title"] = "Películas";
     Layout = "~/Views/Shared/_Layout.cshtml";
-
-    var currentTitle = Context.Request.Query["titulo"];
-    var currentPage =  1;
-    var totalResults = int.TryParse(Model?.TotalResults, out var total) ? total : 0;
-    var totalPages = (int)Math.Ceiling(totalResults / 10.0); // OMDb devuelve 10 resultados por página
 }
 
-<h1>Buscar películas</h1>
-
-<form method="get" asp-controller="Peliculas" asp-action="Index" class="mb-4">
-    <div class="input-group">
-        <input type="text" name="titulo" class="form-control" placeholder="Ingrese el título de la película" value="@currentTitle" />
-        <input type="hidden" name="pagina" value="1" />
-        <button type="submit" class="btn btn-primary">Buscar</button>
-    </div>
-</form>
-
-@if (!string.IsNullOrEmpty(ViewBag.Message))
+<!-- Notificaciones Toast -->
+@if (TempData["NotificacionTipo"] != null)
 {
-    <div class="alert alert-info">@ViewBag.Message</div>
-}
-
-@if (!string.IsNullOrEmpty(ViewBag.Error))
-{
-    <div class="alert alert-danger">
-        <strong>Error:</strong> @ViewBag.Error <br />
-        @ViewBag.Detail
+    <div id="notification-toast" class="toast position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div class="toast-header">
+            <strong class="me-auto">@TempData["NotificacionTitulo"]</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            <p>@TempData["NotificacionMensaje"]</p>
+            @if (TempData["NotificacionDetalle"] != null)
+            {
+                <details class="mt-2">
+                    <summary>Detalles</summary>
+                    <div class="bg-light p-2 mt-2">@TempData["NotificacionDetalle"]</div>
+                </details>
+            }
+        </div>
     </div>
 }
-else if (Model?.Search != null && Model.Search.Any())
-{
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-        @foreach (var pelicula in Model.Search)
-        {
-            <div class="col">
-                <div class="card h-100">
-                    <img src="@pelicula.Poster" class="card-img-top" alt="@pelicula.Title" />
-                    <div class="card-body">
-                        <h5 class="card-title">@pelicula.Title</h5>
-                        <p class="card-text">@pelicula.Year (@pelicula.Type)</p>
-                        <a href="https://www.imdb.com/title/@pelicula.imdbID" class="btn btn-primary" target="_blank">Ver en IMDb</a>
+
+<div class="container mt-4">
+    <h1 class="mb-4">@ViewData["Title"]</h1>
+
+    <!-- Formulario de Búsqueda -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" asp-action="Index" class="row g-3">
+                <div class="col-md-8">
+                    <input type="text" name="search" class="form-control"
+                           value="@(ViewBag.Search ?? ViewBag.TituloBusqueda)"
+                           placeholder="Buscar por título...">
+                </div>
+                <div class="col-md-2">
+                    <select name="pageSize" class="form-select" onchange="this.form.submit()">
+                        <option value="5" selected="@(ViewBag.PageSize == 5 || ViewBag.CantidadPorPagina == 5)">5 por página</option>
+                        <option value="10" selected="@(ViewBag.PageSize == 10 || ViewBag.CantidadPorPagina == 10)">10 por página</option>
+                        <option value="20" selected="@(ViewBag.PageSize == 20 || ViewBag.CantidadPorPagina == 20)">20 por página</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i> Buscar
+                    </button>
+                </div>
+               
+            </form>
+        </div>
+    </div>
+
+    <!-- Resultados de Búsqueda -->
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            No se encontraron películas que coincidan con tu búsqueda.
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            @foreach (var pelicula in Model)
+            {
+                <div class="col">
+                    <div class="card h-100">
+                        <img src="@pelicula.Poster" class="card-img-top" alt="@pelicula.Titulo"
+                             onerror="this.src='https://via.placeholder.com/300x450?text=Poster+no+disponible'">
+                        <div class="card-body">
+                            <h5 class="card-title">@pelicula.Titulo (@pelicula.Anio)</h5>
+                            <p class="card-text text-muted">@pelicula.Genero</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-primary">
+                                    <i class="bi bi-star-fill"></i> @pelicula.ImdbRating
+                                </span>
+                                <a href="@Url.Action("Detalles", new { id = pelicula.ImdbID })"
+                                   class="btn btn-sm btn-outline-primary">
+                                    Ver detalles
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
+            }
+        </div>
+
+        <!-- Paginación -->
+        @if (Model.PaginasTotales > 1)
+        {
+            int paginasAMostrar = 5;
+            int inicio = Math.Max(1, Model.PaginaInicio - (paginasAMostrar / 2));
+            int fin = Math.Min(Model.PaginasTotales, inicio + paginasAMostrar - 1);
+
+            if (fin - inicio + 1 < paginasAMostrar)
+            {
+                inicio = Math.Max(1, fin - paginasAMostrar + 1);
+            }
+
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    @if (Model.PaginaInicio > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="@Url.Action("Index", new {
+                           search = ViewBag.Search ?? ViewBag.TituloBusqueda,
+                           page = 1,
+                           pageSize = ViewBag.PageSize ?? ViewBag.CantidadPorPagina
+                       })" aria-label="Primera">
+                                <i class="bi bi-chevron-bar-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="@Url.Action("Index", new {
+                           search = ViewBag.Search ?? ViewBag.TituloBusqueda,
+                           page = Model.PaginaInicio - 1,
+                           pageSize = ViewBag.PageSize ?? ViewBag.CantidadPorPagina
+                       })" aria-label="Anterior">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                    }
+
+                    @if (inicio > 1)
+                    {
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    }
+
+                    @for (int i = inicio; i <= fin; i++)
+                    {
+                        <li class="page-item @(i == Model.PaginaInicio ? "active" : "")">
+                            <a class="page-link"
+                               href="@Url.Action("Index", new {
+                           search = ViewBag.Search ?? ViewBag.TituloBusqueda,
+                           page = i,
+                           pageSize = ViewBag.PageSize ?? ViewBag.CantidadPorPagina
+                       })">
+                                @i
+                            </a>
+                        </li>
+                    }
+
+                    @if (fin < Model.PaginasTotales)
+                    {
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    }
+
+                    @if (Model.PaginaInicio < Model.PaginasTotales)
+                    {
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="@Url.Action("Index", new {
+                           search = ViewBag.Search ?? ViewBag.TituloBusqueda,
+                           page = Model.PaginaInicio + 1,
+                           pageSize = ViewBag.PageSize ?? ViewBag.CantidadPorPagina
+                       })" aria-label="Siguiente">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="@Url.Action("Index", new {
+                           search = ViewBag.Search ?? ViewBag.TituloBusqueda,
+                           page = Model.PaginasTotales,
+                           pageSize = ViewBag.PageSize ?? ViewBag.CantidadPorPagina
+                       })" aria-label="Última">
+                                <i class="bi bi-chevron-bar-right"></i>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
         }
-    </div>
 
-    <!-- Paginación -->
-    <nav class="mt-4">
-        <ul class="pagination justify-content-center">
-            @if (currentPage > 1)
-            {
-                <li class="page-item">
-                    <a class="page-link" asp-action="Index" asp-route-titulo="@currentTitle" asp-route-pagina="@(currentPage - 1)">Anterior</a>
-                </li>
-            }
+        <div class="text-center text-muted mt-2">
+            Mostrando página @Model.PaginaInicio de @Model.PaginasTotales -
+            @Model.Count películas encontradas
+        </div>
+    }
+</div>
 
-            @for (int i = 1; i <= totalPages; i++)
-            {
-                <li class="page-item @(i == currentPage ? "active" : "")">
-                    <a class="page-link" asp-action="Index" asp-route-titulo="@currentTitle" asp-route-pagina="@i">@i</a>
-                </li>
-            }
 
-            @if (currentPage < totalPages)
-            {
-                <li class="page-item">
-                    <a class="page-link" asp-action="Index" asp-route-titulo="@currentTitle" asp-route-pagina="@(currentPage + 1)">Siguiente</a>
-                </li>
-            }
-        </ul>
-    </nav>
-}
-else
-{
-    <div class="alert alert-warning">No se encontraron películas.</div>
+<!-- Pequeños scripts para notificaciones y ayudar a cargar datos a los modal edit y delete -->
+
+@section Scripts {
+    <script>
+        // Inicializar tooltips de Bootstrap
+        document.addEventListener('DOMContentLoaded', function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
+
+    @if (TempData["NotificacionTipo"] != null)
+    {
+        <script>
+            $(document).ready(function() {
+                var toastEl = document.getElementById('notification-toast');
+                var toastType = '@TempData["NotificacionTipo"]';
+
+                // Añadir clase según el tipo de notificación
+                switch(toastType) {
+                    case 'success':
+                        toastEl.classList.add('bg-success', 'text-dark');
+                        break;
+                    case 'error':
+                        toastEl.classList.add('bg-danger', 'text-dark');
+                        break;
+                    case 'warning':
+                        toastEl.classList.add('bg-warning', 'text-dark');
+                        break;
+                    case 'info':
+                        toastEl.classList.add('bg-info', 'text-dark');
+                        break;
+                }
+
+                var toast = new bootstrap.Toast(toastEl);
+                toast.show();
+            });
+        </script>
+    }
 }

@@ -111,6 +111,24 @@ namespace CineAtom.WebApi.Controllers
                     });
                 }
 
+                if (dto.Cantidad < 0)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "El artículo no puede tener cantidad negativa."
+                    });
+                }
+
+                if (dto.Precio < 0)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "El artículo no puede tener precio negativo."
+                    });
+                }
+
                 if (string.IsNullOrWhiteSpace(dto.Nombre))
                 {
                     return BadRequest(new
@@ -180,6 +198,33 @@ namespace CineAtom.WebApi.Controllers
                     {
                         success = false,
                         message = "El objeto enviado es nulo."
+                    });
+                }
+
+                if (dto.Cantidad < 0)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "El artículo no puede tener cantidad negativa."
+                    });
+                }
+
+                if (dto.Precio < 0)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "El artículo no puede tener precio negativo."
+                    });
+                }
+
+                if (string.IsNullOrWhiteSpace(dto.Nombre))
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "El nombre del artículo es obligatorio."
                     });
                 }
 

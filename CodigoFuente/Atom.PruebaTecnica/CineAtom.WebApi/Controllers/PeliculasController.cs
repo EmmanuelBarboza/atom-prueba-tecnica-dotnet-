@@ -57,7 +57,7 @@ namespace CineAtom.WebApi.Controllers
                 var json = await response.Content.ReadAsStringAsync();
                 var resultado = JsonSerializer.Deserialize<OMDbSearchResponseDTO>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                if (resultado == null || resultado.Search == null)
+                if (resultado == null || resultado.Search == null || !resultado.Search.Any())
                 {
                     return NotFound(new
                     {
@@ -65,6 +65,7 @@ namespace CineAtom.WebApi.Controllers
                         message = "No se encontraron resultados para la búsqueda."
                     });
                 }
+
 
                 return Ok(new
                 {

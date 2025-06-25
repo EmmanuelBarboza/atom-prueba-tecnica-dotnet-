@@ -1,19 +1,103 @@
 ﻿@using CineAtom.Web.DTOs.Articulo
-@model IEnumerable<ArticuloDTO>
+@model CineAtom.Web.Data.Paginacion<ArticuloDTO>
 
+<!-- Notificaciones Toast -->
+@if (TempData["NotificacionTipo"] != null)
+{
+    <div id="notification-toast" class="toast position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div class="toast-header">
+            <strong class="me-auto">@TempData["NotificacionTitulo"]</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            <p>@TempData["NotificacionMensaje"]</p>
+            @if (TempData["NotificacionDetalle"] != null)
+            {
+                <details class="mt-2">
+                    <summary>Detalles</summary>
+                    <div class="bg-light p-2 mt-2">@TempData["NotificacionDetalle"]</div>
+                </details>
+            }
+        </div>
+    </div>
+}
 @{
     ViewData["Title"] = "Artículos";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<!-- Titulo de pagina -->
 <h1 class="mb-4">Artículos</h1>
 
+<!-- Formulario de Filtrado -->
+<div class="card mb-4">
+    <div class="card-header card-header-rojo-cine">
+
+        <h5 class="mb-0">Filtrar Artículos</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" asp-action="Index" class="row g-3">
+            <input type="hidden" name="paginaInicio" value="1" />
+            <input type="hidden" name="cantidadregistros" value="@ViewBag.CantidadRegistros" />
+
+            <div class="col-md-4">
+                <label for="filtroNombre" class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="filtroNombre" name="filtroNombre"
+                       value="@ViewBag.FiltroNombre" placeholder="Buscar por nombre..." />
+            </div>
+
+            <div class="col-md-3">
+                <label for="filtroCategoriaId" class="form-label">Categoría</label>
+                <select class="form-select" id="filtroCategoriaId" name="filtroCategoriaId">
+                    <option value="">Todas las categorías</option>
+                    @if (ViewBag.Categorias != null)
+                    {
+                        foreach (var cat in ViewBag.Categorias)
+                        {
+                            <option value="@cat.CategoriaId"
+                                    selected="@(ViewBag.FiltroCategoriaId != null && ViewBag.FiltroCategoriaId == cat.CategoriaId)">
+                                @cat.Nombre
+                            </option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label for="precioMin" class="form-label">Precio Mínimo</label>
+                <input type="number" step="0.01" class="form-control" id="precioMin"
+                       name="precioMin" value="@ViewBag.PrecioMin" placeholder="Mínimo" />
+            </div>
+
+            <div class="col-md-2">
+                <label for="precioMax" class="form-label">Precio Máximo</label>
+                <input type="number" step="0.01" class="form-control" id="precioMax"
+                       name="precioMax" value="@ViewBag.PrecioMax" placeholder="Máximo" />
+            </div>
+
+            <div class="col-auto d-flex align-items-end">
+                <div class="btn-group" role="group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-funnel"></i> Filtrar
+                    </button>
+                    <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </a>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<!-- Boton para abrir el modal de agregar -->
 <p>
     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregar">
-        Agregar Artículo
+        <i class="bi bi-plus-circle"></i> Agregar Artículo
     </button>
 </p>
 
+<!--En caso de error viewbag -->
 @if (ViewBag.Error != null)
 {
     <div class="alert alert-danger">
@@ -22,36 +106,261 @@
     </div>
 }
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>@Html.DisplayNameFor(model => model.First().ArticuloId)</th>
-            <th>@Html.DisplayNameFor(model => model.First().Nombre)</th>
-            <th>@Html.DisplayNameFor(model => model.First().Descripcion)</th>
-            <th>@Html.DisplayNameFor(model => model.First().Cantidad)</th>
-            <th>@Html.DisplayNameFor(model => model.First().Precio)</th>
-            <th>@Html.DisplayNameFor(model => model.First().Categoria.Nombre)</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
+
+<!-- La parte que muestra los filtros usados -->
+@if (!string.IsNullOrEmpty(ViewBag.FiltroNombre) || ViewBag.FiltroCategoriaId != null || ViewBag.PrecioMin != null || ViewBag.PrecioMax != null)
+{
+    <div class="alert alert-info mb-3">
+        <strong>Filtros aplicados:</strong>
+        @if (!string.IsNullOrEmpty(ViewBag.FiltroNombre))
         {
-            <tr>
-                <td>@item.ArticuloId</td>
-                <td>@item.Nombre</td>
-                <td>@item.Descripcion</td>
-                <td>@item.Cantidad</td>
-                <td>@item.Precio</td>
-                <td>@item.Categoria.Nombre</td>
-                <td>
-                    @Html.ActionLink("Editar", "Edit", new { id = item.ArticuloId }, new { @class = "btn btn-sm btn-warning" }) |
-                    @Html.ActionLink("Eliminar", "Delete", new { id = item.ArticuloId }, new { @class = "btn btn-sm btn-danger" })
-                </td>
-            </tr>
+            <span class="badge bg-primary me-2">Nombre: "@ViewBag.FiltroNombre"</span>
         }
-    </tbody>
-</table>
+        @if (ViewBag.FiltroCategoriaId != null)
+        {
+            var categoriaNombre = (ViewBag.Categorias as List<Categoria>)?.FirstOrDefault(c => c.CategoriaId == (int)ViewBag.FiltroCategoriaId)?.Nombre;
+            <span class="badge bg-primary me-2">Categoría: @categoriaNombre</span>
+        }
+        @if (ViewBag.PrecioMin != null || ViewBag.PrecioMax != null)
+        {
+            <span class="badge bg-primary me-2">
+                Precio:
+                @if (ViewBag.PrecioMin != null)
+                {
+                    <span>Desde @ViewBag.PrecioMin.ToString("C")</span>
+                }
+                @if (ViewBag.PrecioMax != null)
+                {
+                    <span>Hasta @ViewBag.PrecioMax.ToString("C")</span>
+                }
+            </span>
+        }
+        <a href="@Url.Action("Index")" class="float-end">Limpiar filtros</a>
+    </div>
+}
+
+
+<!-- Tabla de los articulos -->
+<div class="table-responsive rounded-4 border shadow-sm" style="overflow-x: auto;">
+    <table class="table table-striped table-hover mb-0" style="min-width: 1000px;">
+        <thead class="table-danger">
+            <tr>
+                <th>ID</th>
+                <th>@Html.DisplayNameFor(model => model.First().Nombre)</th>
+                <th>@Html.DisplayNameFor(model => model.First().Descripcion)</th>
+                <th>@Html.DisplayNameFor(model => model.First().Cantidad)</th>
+                <th>@Html.DisplayNameFor(model => model.First().Precio)</th>
+                <th>Categoria</th>
+                <th class="text-end">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="7" class="text-center">No se encontraron artículos</td>
+                </tr>
+            }
+            else
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.ArticuloId</td>
+                        <td>@item.Nombre</td>
+                        <td>@item.Descripcion</td>
+                        <td>@item.Cantidad</td>
+                        <td>@item.Precio.ToString("C")</td>
+                        <td>@item.Categoria.Nombre</td>
+                        <td class="text-end">
+                            <a href="@Url.Action("EditarModal", "Articulo", new { id = item.ArticuloId })"
+                               class="btn btn-warning btn-sm" title="Editar">
+                                Editar
+                                <i class="bi bi-pencil"></i>
+                            </a>
+
+                            @if (item.Cantidad > 0)
+                            {
+                                <a href="@Url.Action("EliminarModal", "Articulo", new { id = item.ArticuloId })"
+                                   class="btn btn-danger disabled"
+                                   aria-disabled="true" title="No se puede eliminar (existencias > 0)">
+                                    Eliminar
+
+                                </a>
+                            }
+                            else
+                            {
+                                <a href="@Url.Action("EliminarModal", "Articulo", new { id = item.ArticuloId })"
+                                   class="btn btn-danger" title="Eliminar">
+                                    Eliminar
+
+                                </a>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+
+<!-- Paginar -->
+@if (Model.PaginasTotales > 1)
+{
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            @if (Model.PaginasAnteriores)
+            {
+                <li class="page-item">
+                    <a class="page-link"
+                       href="@Url.Action("Index", new {
+                           filtroNombre = ViewBag.FiltroNombre,
+                           filtroCategoriaId = ViewBag.FiltroCategoriaId,
+                           precioMin = ViewBag.PrecioMin,
+                           precioMax = ViewBag.PrecioMax,
+                           paginaInicio = Model.PaginaInicio - 1,
+                           cantidadregistros = ViewBag.CantidadRegistros
+                       })">
+                        Anterior
+                    </a>
+                </li>
+            }
+
+            @for (int i = 1; i <= Model.PaginasTotales; i++)
+            {
+                <li class="page-item @(i == Model.PaginaInicio ? "active" : "")">
+                    <a class="page-link"
+                       href="@Url.Action("Index", new {
+                           filtroNombre = ViewBag.FiltroNombre,
+                           filtroCategoriaId = ViewBag.FiltroCategoriaId,
+                           precioMin = ViewBag.PrecioMin,
+                           precioMax = ViewBag.PrecioMax,
+                           paginaInicio = i,
+                           cantidadregistros = ViewBag.CantidadRegistros
+                       })">
+                        @i
+                    </a>
+                </li>
+            }
+
+            @if (Model.PaginasPosteriores)
+            {
+                <li class="page-item">
+                    <a class="page-link"
+                       href="@Url.Action("Index", new {
+                           filtroNombre = ViewBag.FiltroNombre,
+                           filtroCategoriaId = ViewBag.FiltroCategoriaId,
+                           precioMin = ViewBag.PrecioMin,
+                           precioMax = ViewBag.PrecioMax,
+                           paginaInicio = Model.PaginaInicio + 1,
+                           cantidadregistros = ViewBag.CantidadRegistros
+                       })">
+                        Siguiente
+                    </a>
+                </li>
+            }
+        </ul>
+    </nav>
+}
+
+<div class="text-center text-muted">
+    Mostrando página @Model.PaginaInicio de @Model.PaginasTotales -
+    Total de artículos: @Model.Count
+</div>
+
+<!-- Selector por página -->
+<div class="row justify-content-end mb-3">
+    <div class="col-auto">
+        <form method="get" class="form-inline">
+            <input type="hidden" name="filtroNombre" value="@ViewBag.FiltroNombre" />
+            <input type="hidden" name="filtroCategoriaId" value="@ViewBag.FiltroCategoriaId" />
+            <input type="hidden" name="precioMin" value="@ViewBag.PrecioMin" />
+            <input type="hidden" name="precioMax" value="@ViewBag.PrecioMax" />
+            <input type="hidden" name="paginaInicio" value="1" />
+
+            <label for="cantidadregistros" class="mr-2">Items por página:</label>
+            <select name="cantidadregistros" id="cantidadregistros" class="form-control" onchange="this.form.submit()">
+                <option value="5" selected="@(ViewBag.CantidadRegistros == 5)">5</option>
+                <option value="10" selected="@(ViewBag.CantidadRegistros == 10)">10</option>
+                <option value="20" selected="@(ViewBag.CantidadRegistros == 20)">20</option>
+                <option value="50" selected="@(ViewBag.CantidadRegistros == 50)">50</option>
+            </select>
+        </form>
+    </div>
+</div>
 
 <!-- Modal Agregar -->
 @Html.Partial("_ModalAgregar")
+<!-- Modal Editar -->
+@Html.Partial("_ModalEditar")
+<!-- Modal Eliminar -->
+@Html.Partial("_ModalEliminar")
+
+
+<!-- Pequeños scripts para notificaciones y ayudar a cargar datos a los modal edit y delete -->
+@section Scripts {
+    @if (ViewBag.MostrarModalEditar != null && (bool)ViewBag.MostrarModalEditar)
+    {
+        <script>
+            $(document).ready(function() {
+                var modalEditar = new bootstrap.Modal(document.getElementById('modalEditar'));
+                modalEditar.show();
+            });
+        </script>
+    }
+
+    @if (ViewBag.MostrarModalEliminar != null && (bool)ViewBag.MostrarModalEliminar)
+    {
+        <script>
+            $(document).ready(function() {
+                var modalEliminar = new bootstrap.Modal(document.getElementById('modalEliminar'));
+                modalEliminar.show();
+            });
+        </script>
+    }
+
+    @if (TempData["NotificacionTipo"] != null)
+    {
+        <script>
+            $(document).ready(function() {
+                var toastEl = document.getElementById('notification-toast');
+                var toastType = '@TempData["NotificacionTipo"]';
+
+                // Añadir clase según el tipo de notificación
+                switch(toastType) {
+                    case 'success':
+                        toastEl.classList.add('bg-success', 'text-dark');
+                        break;
+                    case 'error':
+                        toastEl.classList.add('bg-danger', 'text-dark');
+                        break;
+                    case 'warning':
+                        toastEl.classList.add('bg-warning', 'text-dark');
+                        break;
+                    case 'info':
+                        toastEl.classList.add('bg-info', 'text-dark');
+                        break;
+                }
+
+                var toast = new bootstrap.Toast(toastEl);
+                toast.show();
+            });
+        </script>
+    }
+
+    <script>
+        $(document).ready(function() {
+            $('form').submit(function() {
+                var precioMin = parseFloat($('#precioMin').val());
+                var precioMax = parseFloat($('#precioMax').val());
+
+                if (!isNaN(precioMin) && !isNaN(precioMax) && precioMin > precioMax) {
+                    alert('El precio mínimo no puede ser mayor que el precio máximo');
+                    return false;
+                }
+                return true;
+            });
+        });
+    </script>
+}

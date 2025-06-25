@@ -1,8 +1,88 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Inicio - CineAtom";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!-- Hero Section con dos columnas -->
+<section class="hero-section py-5" style="background-color: var(--crema-fondo);">
+    <div class="container py-5">
+        <div class="row align-items-center">
+            <!-- Columna izquierda - Texto de bienvenida -->
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <h1 class="display-4 fw-bold mb-4">Bienvenido a <span class="text-cine">CineAtom</span></h1>
+                <p class="lead mb-4" style="font-size: 1.25rem;">
+                    Bienvenido a CineAtom, tu sistema de gestión integral para salas de cine. Desde la administración de artículos de consumo como palomitas, bebidas y combos, hasta productos promocionales exclusivos, nuestra plataforma está diseñada para apoyar al personal del cine en el control eficiente del inventario y las operaciones diarias.
+                </p>
+                <div class="d-flex gap-3">
+                    <a asp-controller="Peliculas" asp-action="Index" class="btn btn-primary btn-lg px-4">
+                        <i class="bi bi-film me-2"></i>Cartelera
+                    </a>
+                    <a asp-controller="Articulo" asp-action="Index" class="btn btn-primary btn-lg px-4">
+                        <i class="bi bi-box-seam me-2"></i>Ver Inventario
+                    </a>
+                </div>
+            </div>
+
+            <!-- Columna derecha - Logo -->
+            <div class="col-lg-6 text-center">
+                <img src="~/img/logo.png" alt="Logo CineAtom" class="img-fluid" style="max-height: 400px; width: auto;">
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+<style>
+    /* Estilos personalizados */
+    .hero-section {
+        position: relative;
+    }
+
+    .text-cine {
+        color: var(--rojo-cine);
+        position: relative;
+        display: inline-block;
+    }
+
+        .text-cine::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--amarillo-palomita);
+            transform: scaleX(1);
+            transition: transform 0.3s ease;
+        }
+
+    .feature-icon {
+        transition: transform 0.3s ease;
+    }
+
+    .card:hover .feature-icon {
+        transform: scale(1.2);
+    }
+
+    .btn-primary {
+        background-color: var(--rojo-cine);
+        border-color: var(--rojo-cine);
+        transition: all 0.3s ease;
+    }
+
+        .btn-primary:hover {
+            background-color: var(--rojo-claro-palomitas);
+            border-color: var(--rojo-claro-palomitas);
+            transform: translateY(-2px);
+        }
+
+    /* Efecto hover para las cards de características */
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+        }
+</style>
