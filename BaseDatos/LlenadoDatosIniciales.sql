@@ -1,12 +1,8 @@
 USE CineAtomDB;
 GO
 
--- Primero vaciamos las tablas, considerando que hay clave foránea, eliminar primero artículos
-DELETE FROM CineAtom_Articulo;
-DELETE FROM CineAtom_Categoria;
-GO
 
--- Insertamos 5 categorías distintas
+-- Insertamos 5 categorias distintas
 INSERT INTO CineAtom_Categoria (Nombre) VALUES
 ('Snacks'),
 ('Combos'),
@@ -15,7 +11,7 @@ INSERT INTO CineAtom_Categoria (Nombre) VALUES
 ('Dulcería');
 GO
 
--- Insertamos 30 artículos repartidos entre las 5 categorías (usando CategoriaId del 1 al 5)
+-- Insertamos 30 articulos repartidos entre las 5 categorías (usando CategoriaId del 1 al 5)
 INSERT INTO CineAtom_Articulo (Nombre, Descripcion, Cantidad, Precio, CategoriaId) VALUES
 ('Palomitas clásicas', 'Palomitas de maíz con mantequilla', 50, 2.50, 1),
 ('Hot dog simple', 'Pan con salchicha y mostaza', 30, 3.00, 1),
@@ -23,7 +19,7 @@ INSERT INTO CineAtom_Articulo (Nombre, Descripcion, Cantidad, Precio, CategoriaI
 ('Refresco cola', 'Bebida gaseosa de 500ml', 100, 1.80, 3),
 ('Edición limitada Spider-Man', 'Palomitas saborizadas edición limitada', 10, 3.50, 4),
 
-('Nachos con queso', 'Nachos con salsa de queso', 40, 3.20, 1),
+('Nachos con queso', 'Nachos con salsa de queso', 0, 3.20, 1),
 ('Combo familiar', '2 combos + 2 refrescos', 15, 12.00, 2),
 ('Agua mineral', 'Botella de agua de 500ml', 80, 1.00, 3),
 ('Galletas dulces', 'Paquete de galletas variadas', 25, 2.00, 5),

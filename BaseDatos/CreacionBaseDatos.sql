@@ -1,4 +1,4 @@
--- Script para crear la base de datos CineAtomDB
+-- Script para crear la base de datos
 
 CREATE DATABASE CineAtomDB;
 GO

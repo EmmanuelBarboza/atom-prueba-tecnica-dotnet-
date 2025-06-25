@@ -12,19 +12,28 @@ namespace CineAtom.WebApi.Controllers
     [Route("api/[controller]")]
     public class ArticulosController : Controller
     {
+        #region Constructor y Dependencies
         private readonly CineAtomDbContext _context;
 
         public ArticulosController(CineAtomDbContext context)
         {
             _context = context;
         }
+        #endregion
 
+        #region Operaciones GET
+        /// <summary>
+        /// Obtiene todos los articulos con sus categorias
+        /// <returns>Lista de articulos con informacion de categoria</returns>
         [HttpGet]
         public async Task<IActionResult> GetArticulos()
         {
             try
             {
+                // Obtener todos los articulos incluyendo la informacion de categoria
                 var articulos = await _context.Articulos.Include(a => a.Categoria).ToListAsync();
+
+                // Retornar lista de articulos con formato de exito
                 return Ok(new { success = true, data = articulos });
             }
             catch (SqlException sqlEx)
@@ -49,17 +58,20 @@ namespace CineAtom.WebApi.Controllers
             }
         }
 
+        /// <summary>
+        /// Busca un articulo por su ID
+        /// <param name="id">ID del articulo a buscar</param>
+        /// <returns>Articulo encontrado o mensaje de error</returns>
         [HttpGet("Buscar/{id}")]
         public async Task<IActionResult> Buscar(int id)
         {
             try
             {
-
-
-
+                // Buscar articulo por ID incluyendo la categoria relacionada
                 var articulo = await _context.Articulos.Include(a => a.Categoria)
                     .FirstOrDefaultAsync(x => x.ArticuloId == id);
 
+                // Validar si el articulo existe
                 if (articulo == null)
                 {
                     return NotFound(new
@@ -69,12 +81,12 @@ namespace CineAtom.WebApi.Controllers
                     });
                 }
 
-
-
+                // Retornar articulo encontrado
                 return Ok(new { success = true, data = articulo });
             }
             catch (SqlException sqlEx)
             {
+                // Error especifico de SQL
                 return StatusCode(500, new
                 {
                     success = false,
@@ -84,6 +96,7 @@ namespace CineAtom.WebApi.Controllers
             }
             catch (TimeoutException timeoutEx)
             {
+                // Error por tiempo de espera agotado
                 return StatusCode(504, new
                 {
                     success = false,
@@ -93,6 +106,7 @@ namespace CineAtom.WebApi.Controllers
             }
             catch (Exception ex)
             {
+                // Error inesperado
                 return StatusCode(500, new
                 {
                     success = false,
@@ -101,12 +115,19 @@ namespace CineAtom.WebApi.Controllers
                 });
             }
         }
+        #endregion
 
+        #region Operaciones POST
+        /// <summary>
+        /// Agrega un nuevo articulo al sistema
+        /// <param name="dto">DTO con los datos del nuevo articulo</param>
+        /// <returns>Respuesta con el articulo creado o mensaje de error</returns>
         [HttpPost("Agregar")]
         public async Task<IActionResult> Agregar([FromBody] CreateArticuloDTO dto)
         {
             try
             {
+                // Validar objeto recibido
                 if (dto == null)
                 {
                     return BadRequest(new
@@ -116,15 +137,17 @@ namespace CineAtom.WebApi.Controllers
                     });
                 }
 
-                if (dto.Cantidad < 0)
+                // Validar cantidad no negativa
+                if (dto.Cantidad <= 0)
                 {
                     return BadRequest(new
                     {
                         success = false,
-                        message = "El artículo no puede tener cantidad negativa."
+                        message = "El artículo no puede tener cantidad negativa ni 0."
                     });
                 }
 
+                // Validar precio no negativo
                 if (dto.Precio < 0)
                 {
                     return BadRequest(new
@@ -134,6 +157,7 @@ namespace CineAtom.WebApi.Controllers
                     });
                 }
 
+                // Validar nombre obligatorio
                 if (string.IsNullOrWhiteSpace(dto.Nombre))
                 {
                     return BadRequest(new
@@ -143,6 +167,7 @@ namespace CineAtom.WebApi.Controllers
                     });
                 }
 
+                // Verificar existencia de la categoria
                 var categoriaExiste = await _context.Categorias.AnyAsync(c => c.CategoriaId == dto.CategoriaId);
                 if (!categoriaExiste)
                 {
@@ -153,6 +178,7 @@ namespace CineAtom.WebApi.Controllers
                     });
                 }
 
+                // Crear nuevo objeto Articulo
                 var nuevoArticulo = new Articulo
                 {
                     Nombre = dto.Nombre,
@@ -162,9 +188,11 @@ namespace CineAtom.WebApi.Controllers
                     CategoriaId = dto.CategoriaId
                 };
 
+                // Agregar y guardar cambios
                 await _context.Articulos.AddAsync(nuevoArticulo);
                 await _context.SaveChangesAsync();
 
+                // Retornar respuesta de creado con ubicacion del nuevo recurso
                 return CreatedAtAction(nameof(Buscar), new { id = nuevoArticulo.ArticuloId }, new
                 {
                     success = true,
@@ -174,6 +202,7 @@ namespace CineAtom.WebApi.Controllers
             }
             catch (DbUpdateException dbEx)
             {
+                // Error al actualizar la base de datos
                 return StatusCode(500, new
                 {
                     success = false,
@@ -183,6 +212,7 @@ namespace CineAtom.WebApi.Controllers
             }
             catch (Exception ex)
             {
+                // Error inesperado
                 return StatusCode(500, new
                 {
                     success = false,
@@ -191,12 +221,20 @@ namespace CineAtom.WebApi.Controllers
                 });
             }
         }
+        #endregion
 
+        #region Operaciones PUT
+        /// <summary>
+        /// Actualiza un articulo existente usando un stored procedure
+        /// <param name="id">ID del articulo a actualizar</param>
+        /// <param name="dto">DTO con los nuevos datos del articulo</param>
+        /// <returns>Respuesta de exito o mensaje de error</returns>
         [HttpPut("Actualizar/{id}")]
         public async Task<IActionResult> Actualizar(int id, [FromBody] UpdateArticuloDTO dto)
         {
             try
             {
+                // Validar objeto recibido
                 if (dto == null)
                 {
                     return BadRequest(new
@@ -206,6 +244,7 @@ namespace CineAtom.WebApi.Controllers
                     });
                 }
 
+                // Validar cantidad no negativa
                 if (dto.Cantidad < 0)
                 {
                     return BadRequest(new
@@ -215,6 +254,7 @@ namespace CineAtom.WebApi.Controllers
                     });
                 }
 
+                // Validar precio no negativo
                 if (dto.Precio < 0)
                 {
                     return BadRequest(new
@@ -224,6 +264,7 @@ namespace CineAtom.WebApi.Controllers
                     });
                 }
 
+                // Validar nombre obligatorio
                 if (string.IsNullOrWhiteSpace(dto.Nombre))
                 {
                     return BadRequest(new
@@ -233,52 +274,39 @@ namespace CineAtom.WebApi.Controllers
                     });
                 }
 
+                // Configurar conexion y comando para el stored procedure
                 var connection = _context.Database.GetDbConnection();
-
                 await connection.OpenAsync();
-
                 var command = connection.CreateCommand();
 
+                // Establecer parametros del stored procedure
                 command.CommandText = "usp_CineAtom_Articulo_Update";
                 command.CommandType = CommandType.StoredProcedure;
 
-                command.Parameters.Add(new SqlParameter("@ArticuloId", SqlDbType.Int)
-                {
-                    Value = id
-                });
-                command.Parameters.Add(new SqlParameter("@Nombre", SqlDbType.NVarChar, 100)
-                {
-                    Value = dto.Nombre
-                });
-                command.Parameters.Add(new SqlParameter("@Descripcion", SqlDbType.NVarChar, 255)
-                {
-                    Value = dto.Descripcion
-                });
-                command.Parameters.Add(new SqlParameter("@Cantidad", SqlDbType.Int)
-                {
-                    Value = dto.Cantidad
-                });
-                command.Parameters.Add(new SqlParameter("@Precio", SqlDbType.Decimal)
-                {
-                    Value = dto.Precio
-                });
-                command.Parameters.Add(new SqlParameter("@CategoriaId", SqlDbType.Int)
-                {
-                    Value = dto.CategoriaId
-                });
+                // Agregar parametros al comando
+                command.Parameters.Add(new SqlParameter("@ArticuloId", SqlDbType.Int) { Value = id });
+                command.Parameters.Add(new SqlParameter("@Nombre", SqlDbType.NVarChar, 100) { Value = dto.Nombre });
+                command.Parameters.Add(new SqlParameter("@Descripcion", SqlDbType.NVarChar, 255) { Value = dto.Descripcion });
+                command.Parameters.Add(new SqlParameter("@Cantidad", SqlDbType.Int) { Value = dto.Cantidad });
+                command.Parameters.Add(new SqlParameter("@Precio", SqlDbType.Decimal) { Value = dto.Precio });
+                command.Parameters.Add(new SqlParameter("@CategoriaId", SqlDbType.Int) { Value = dto.CategoriaId });
 
+                // Configurar parametro de retorno
                 var returnParameter = new SqlParameter("@ReturnVal", SqlDbType.Int)
                 {
                     Direction = ParameterDirection.ReturnValue
                 };
                 command.Parameters.Add(returnParameter);
 
+                // Ejecutar stored procedure
                 await command.ExecuteNonQueryAsync();
 
-                var result = (int) returnParameter.Value;
+                // Evaluar resultado del stored procedure
+                var result = (int)returnParameter.Value;
 
                 if (result == 0)
                 {
+                    // Exito en la actualizacion
                     return Ok(new
                     {
                         success = true,
@@ -287,6 +315,7 @@ namespace CineAtom.WebApi.Controllers
                 }
                 else if (result == -2)
                 {
+                    // Articulo no encontrado
                     return NotFound(new
                     {
                         success = false,
@@ -295,6 +324,7 @@ namespace CineAtom.WebApi.Controllers
                 }
                 else
                 {
+                    // Error desconocido
                     return StatusCode(500, new
                     {
                         success = false,
@@ -304,6 +334,7 @@ namespace CineAtom.WebApi.Controllers
             }
             catch (SqlException ex)
             {
+                // Error especifico de SQL
                 return BadRequest(new
                 {
                     success = false,
@@ -313,6 +344,7 @@ namespace CineAtom.WebApi.Controllers
             }
             catch (Exception ex)
             {
+                // Error inesperado
                 return StatusCode(500, new
                 {
                     success = false,
@@ -321,38 +353,46 @@ namespace CineAtom.WebApi.Controllers
                 });
             }
         }
+        #endregion
 
-
-
+        #region Operaciones DELETE
+        /// <summary>
+        /// Elimina un articulo usando un stored procedure
+        /// <param name="id">ID del articulo a eliminar</param>
+        /// <returns>Respuesta de exito o mensaje de error</returns>
         [HttpDelete("Eliminar/{id}")]
         public async Task<IActionResult> Eliminar(int id)
         {
             try
             {
+                // Configurar conexion y comando para el stored procedure
                 var connection = _context.Database.GetDbConnection();
-
                 await connection.OpenAsync();
-
                 var command = connection.CreateCommand();
 
+                // Establecer stored procedure de eliminacion
                 command.CommandText = "usp_CineAtom_Articulo_Delete";
                 command.CommandType = CommandType.StoredProcedure;
 
+                // Agregar parametro de ID
                 command.Parameters.Add(new SqlParameter("@ArticuloId", SqlDbType.Int) { Value = id });
 
+                // Configurar parametro de retorno
                 var returnParameter = new SqlParameter("@ReturnVal", SqlDbType.Int)
                 {
                     Direction = ParameterDirection.ReturnValue
                 };
-
                 command.Parameters.Add(returnParameter);
 
+                // Ejecutar stored procedure
                 await command.ExecuteNonQueryAsync();
 
-                var result = (int) returnParameter.Value;
+                // Evaluar resultado del stored procedure
+                var result = (int)returnParameter.Value;
 
                 if (result == 0)
                 {
+                    // Exito en la eliminacion
                     return Ok(new
                     {
                         success = true,
@@ -361,6 +401,7 @@ namespace CineAtom.WebApi.Controllers
                 }
                 else if (result == -1)
                 {
+                    // Error: articulo con cantidad mayor a cero
                     return BadRequest(new
                     {
                         success = false,
@@ -369,6 +410,7 @@ namespace CineAtom.WebApi.Controllers
                 }
                 else if (result == -2)
                 {
+                    // Articulo no encontrado
                     return NotFound(new
                     {
                         success = false,
@@ -377,6 +419,7 @@ namespace CineAtom.WebApi.Controllers
                 }
                 else
                 {
+                    // Error desconocido
                     return StatusCode(500, new
                     {
                         success = false,
@@ -386,6 +429,7 @@ namespace CineAtom.WebApi.Controllers
             }
             catch (SqlException ex)
             {
+                // Error especifico de SQL
                 return BadRequest(new
                 {
                     success = false,
@@ -395,6 +439,7 @@ namespace CineAtom.WebApi.Controllers
             }
             catch (Exception ex)
             {
+                // Error inesperado
                 return StatusCode(500, new
                 {
                     success = false,
@@ -403,10 +448,6 @@ namespace CineAtom.WebApi.Controllers
                 });
             }
         }
-
-
-
-
-
+        #endregion
     }
 }

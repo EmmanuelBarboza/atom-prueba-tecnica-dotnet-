@@ -27,7 +27,7 @@ namespace CineAtom.WebApi.Data
                       .IsRequired();
             });
 
-            // Tabla Articulo con FK a Categoria
+            // Tabla Articulo
             modelBuilder.Entity<Articulo>(entity =>
             {
                 entity.ToTable("CineAtom_Articulo");

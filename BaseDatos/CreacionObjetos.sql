@@ -51,10 +51,10 @@ BEGIN
         RETURN -2;
     END
 
-    IF (@CantidadActual > 0)
+    IF (@CantidadActual <= 0)
     BEGIN
 	--Esto para que solo puedan eliminar los que no tengan existencias
-        RAISERROR ('No se puede eliminar un artículo con cantidad mayor a cero.', 16, 1);
+        RAISERROR ('No se puede eliminar un artículo con cantidad igual a cero.', 16, 1);
         RETURN -1;
     END
 
