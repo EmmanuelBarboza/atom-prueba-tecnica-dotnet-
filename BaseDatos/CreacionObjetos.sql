@@ -1,24 +1,6 @@
 USE CineAtomDB;
 GO
 
--- Tabla de categorías
-CREATE TABLE CineAtom_Categoria (
-    CategoriaId INT IDENTITY(1,1) PRIMARY KEY,
-    Nombre NVARCHAR(100) NOT NULL
-);
-GO
-
--- Tabla de artículos
-CREATE TABLE CineAtom_Articulo (
-    ArticuloId INT IDENTITY(1,1) PRIMARY KEY,
-    Nombre NVARCHAR(100) NOT NULL,
-    Descripcion NVARCHAR(255) NULL,
-    Cantidad INT NOT NULL DEFAULT 0,
-    Precio DECIMAL(10,2) NOT NULL,
-    CategoriaId INT NOT NULL,
-    FOREIGN KEY (CategoriaId) REFERENCES CineAtom_Categoria(CategoriaId)
-);
-GO
 
 CREATE OR ALTER PROCEDURE usp_CineAtom_Articulo_Update
     @ArticuloId INT,
@@ -78,9 +60,9 @@ BEGIN
 
     DELETE FROM CineAtom_Articulo WHERE ArticuloId = @ArticuloId;
 
-    IF @@ROWCOUNT = 0
+    IF @@ROWCOUNT = 0 --Osea la cantidad de filas alteradas
     BEGIN
-        -- No se eliminó ningún registro
+        -- No se elimin ningún registro
         RETURN -2;
     END
 

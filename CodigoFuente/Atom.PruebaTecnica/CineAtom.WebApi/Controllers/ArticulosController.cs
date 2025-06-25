@@ -29,22 +29,22 @@ namespace CineAtom.WebApi.Controllers
             }
             catch (SqlException sqlEx)
             {
-                // Error relacionado con la base de datos (conexión, consulta, etc)
+                // Error relacionado con la base de datos 
                 return StatusCode(500, new { success = false, message = "Error en la base de datos al obtener artículos.", detail = sqlEx.Message });
             }
             catch (TimeoutException timeoutEx)
             {
-                // Timeout en la operación
+                // Timeout en la operacion
                 return StatusCode(504, new { success = false, message = "Tiempo de espera agotado al obtener artículos.", detail = timeoutEx.Message });
             }
             catch (ArgumentNullException argNullEx)
             {
-                // Argumento inválido o nulo
+                // Argumento no valido o nulo
                 return BadRequest(new { success = false, message = "Argumento inválido recibido.", detail = argNullEx.Message });
             }
             catch (Exception ex)
             {
-                // Error general inesperado
+                // Error general 
                 return StatusCode(500, new { success = false, message = "Error inesperado al obtener artículos.", detail = ex.Message });
             }
         }
@@ -54,6 +54,9 @@ namespace CineAtom.WebApi.Controllers
         {
             try
             {
+
+
+
                 var articulo = await _context.Articulos.Include(a => a.Categoria)
                     .FirstOrDefaultAsync(x => x.ArticuloId == id);
 
@@ -65,6 +68,8 @@ namespace CineAtom.WebApi.Controllers
                         message = $"No se encontró un artículo con ID {id}."
                     });
                 }
+
+
 
                 return Ok(new { success = true, data = articulo });
             }
@@ -344,7 +349,7 @@ namespace CineAtom.WebApi.Controllers
 
                 await command.ExecuteNonQueryAsync();
 
-                var result = (int)returnParameter.Value;
+                var result = (int) returnParameter.Value;
 
                 if (result == 0)
                 {

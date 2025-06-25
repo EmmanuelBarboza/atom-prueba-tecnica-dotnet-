@@ -2,11 +2,11 @@
     ViewData["Title"] = "Inicio - CineAtom";
 }
 
-<!-- Hero Section con dos columnas -->
+<!-- dos columnas -->
 <section class="hero-section py-5" style="background-color: var(--crema-fondo);">
     <div class="container py-5">
         <div class="row align-items-center">
-            <!-- Columna izquierda - Texto de bienvenida -->
+            <!-- Texto de bienvenida -->
             <div class="col-lg-6 mb-4 mb-lg-0">
                 <h1 class="display-4 fw-bold mb-4">Bienvenido a <span class="text-cine">CineAtom</span></h1>
                 <p class="lead mb-4" style="font-size: 1.25rem;">
@@ -22,7 +22,7 @@
                 </div>
             </div>
 
-            <!-- Columna derecha - Logo -->
+            <!-- - Logo -->
             <div class="col-lg-6 text-center">
                 <img src="~/img/logo.png" alt="Logo CineAtom" class="img-fluid" style="max-height: 400px; width: auto;">
             </div>
@@ -33,7 +33,7 @@
 
 
 <style>
-    /* Estilos personalizados */
+
     .hero-section {
         position: relative;
     }
@@ -44,17 +44,17 @@
         display: inline-block;
     }
 
-        .text-cine::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background-color: var(--amarillo-palomita);
+    .text-cine::after {
+     content: '';
+      position: absolute;
+      bottom: -5px;
+     left: 0;
+       width: 100%;
+       height: 3px;
+        background-color: var(--amarillo-palomita);
             transform: scaleX(1);
             transition: transform 0.3s ease;
-        }
+    }
 
     .feature-icon {
         transition: transform 0.3s ease;
@@ -70,19 +70,19 @@
         transition: all 0.3s ease;
     }
 
-        .btn-primary:hover {
-            background-color: var(--rojo-claro-palomitas);
-            border-color: var(--rojo-claro-palomitas);
-            transform: translateY(-2px);
-        }
+    .btn-primary:hover {
+       background-color: var(--rojo-claro-palomitas);
+        border-color: var(--rojo-claro-palomitas);
+        transform: translateY(-2px);
+    }
 
-    /* Efecto hover para las cards de características */
+
     .card {
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
-        }
+    .card:hover {
+        ransform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+    }
 </style>
