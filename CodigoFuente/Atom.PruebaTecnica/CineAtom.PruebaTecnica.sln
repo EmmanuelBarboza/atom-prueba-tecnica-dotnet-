@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35931.197
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CineAtom.WebApi", "CineAtom.WebApi\CineAtom.WebApi.csproj", "{75666CF0-56D6-4A77-97FB-AB52A6123FE2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CineAtom.Web", "CineAtom.Web\CineAtom.Web.csproj", "{D8448D12-9539-4A0F-AA61-FDA7F5783AC8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{75666CF0-56D6-4A77-97FB-AB52A6123FE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75666CF0-56D6-4A77-97FB-AB52A6123FE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75666CF0-56D6-4A77-97FB-AB52A6123FE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75666CF0-56D6-4A77-97FB-AB52A6123FE2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8448D12-9539-4A0F-AA61-FDA7F5783AC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8448D12-9539-4A0F-AA61-FDA7F5783AC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8448D12-9539-4A0F-AA61-FDA7F5783AC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8448D12-9539-4A0F-AA61-FDA7F5783AC8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0725AFD9-CA5D-4AF6-AB83-4263DBA57799}
+	EndGlobalSection
+EndGlobal

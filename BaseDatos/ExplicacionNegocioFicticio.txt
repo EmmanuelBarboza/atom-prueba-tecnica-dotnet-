@@ -1,0 +1,34 @@
+Explicación del negocio ficticio: CineAtom
+
+Descripción general:
+-CineAtom es un cine mediano ubicado dentro de un centro comercial. Cuenta con una única sucursal en dicho mall, donde ofrece a sus clientes una experiencia completa de entretenimiento con proyecciones de películas y una variedad de productos alimenticios y promocionales asociados a las películas exhibidas.
+
+Inventario:
+Se administra el inventario de productos vendidos en el cine, tales como:
+
+-Palomitas, hot dogs, bebidas, golosinas, combos.
+
+-Artículos promocionales relacionados con películas (algunos de tiempo limitado, solo decorativos).
+
+Cantidad:
+-Representa la disponibilidad general para la venta de cada producto.
+
+Usuarios:
+El sistema será utilizado por cajeros y personal administrativo para:
+
+-Agregar, modificar y eliminar productos según reglas.
+
+Reglas de negocio:
+
+-No se puede eliminar un artículo con cantidad cero para evitar borrados accidentales.
+
+-Se gestionan los campos: nombre, descripción, cantidad, precio y categoría.
+
+-No se implementa la inclusión de imágenes en esta versión.
+
+Nomenclatura:
+
+-La tabla principal se llamará CineAtom_Articulo.
+
+-Los procedimientos almacenados tendrán prefijo usp_CineAtom_Articulo_ seguido de la acción (Update, Delete, etc.).
+
