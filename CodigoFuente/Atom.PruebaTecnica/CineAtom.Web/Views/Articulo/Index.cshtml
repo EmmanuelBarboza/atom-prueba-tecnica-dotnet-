@@ -1,0 +1,57 @@
+﻿@using CineAtom.Web.DTOs.Articulo
+@model IEnumerable<ArticuloDTO>
+
+@{
+    ViewData["Title"] = "Artículos";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1 class="mb-4">Artículos</h1>
+
+<p>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregar">
+        Agregar Artículo
+    </button>
+</p>
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">
+        <strong>Error:</strong> @ViewBag.Error <br />
+        @ViewBag.Detail
+    </div>
+}
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.First().ArticuloId)</th>
+            <th>@Html.DisplayNameFor(model => model.First().Nombre)</th>
+            <th>@Html.DisplayNameFor(model => model.First().Descripcion)</th>
+            <th>@Html.DisplayNameFor(model => model.First().Cantidad)</th>
+            <th>@Html.DisplayNameFor(model => model.First().Precio)</th>
+            <th>@Html.DisplayNameFor(model => model.First().Categoria.Nombre)</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.ArticuloId</td>
+                <td>@item.Nombre</td>
+                <td>@item.Descripcion</td>
+                <td>@item.Cantidad</td>
+                <td>@item.Precio</td>
+                <td>@item.Categoria.Nombre</td>
+                <td>
+                    @Html.ActionLink("Editar", "Edit", new { id = item.ArticuloId }, new { @class = "btn btn-sm btn-warning" }) |
+                    @Html.ActionLink("Eliminar", "Delete", new { id = item.ArticuloId }, new { @class = "btn btn-sm btn-danger" })
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Modal Agregar -->
+@Html.Partial("_ModalAgregar")

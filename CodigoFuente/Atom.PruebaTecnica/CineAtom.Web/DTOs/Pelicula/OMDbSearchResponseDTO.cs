@@ -1,4 +1,4 @@
-﻿namespace CineAtom.WebApi.DTOs.Pelicula
+﻿namespace CineAtom.Web.DTOs.Pelicula
 {
     public class OMDbSearchResponseDTO
     {
@@ -7,5 +7,4 @@
         public string Response { get; set; }
         public string Error { get; set; }
     }
-
 }

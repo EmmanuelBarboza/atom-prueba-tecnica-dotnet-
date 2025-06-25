@@ -1,0 +1,82 @@
+﻿@model CineAtom.Web.DTOs.Pelicula.OMDbSearchResponseDTO
+
+@{
+    ViewData["Title"] = "Películas";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var currentTitle = Context.Request.Query["titulo"];
+    var currentPage =  1;
+    var totalResults = int.TryParse(Model?.TotalResults, out var total) ? total : 0;
+    var totalPages = (int)Math.Ceiling(totalResults / 10.0); // OMDb devuelve 10 resultados por página
+}
+
+<h1>Buscar películas</h1>
+
+<form method="get" asp-controller="Peliculas" asp-action="Index" class="mb-4">
+    <div class="input-group">
+        <input type="text" name="titulo" class="form-control" placeholder="Ingrese el título de la película" value="@currentTitle" />
+        <input type="hidden" name="pagina" value="1" />
+        <button type="submit" class="btn btn-primary">Buscar</button>
+    </div>
+</form>
+
+@if (!string.IsNullOrEmpty(ViewBag.Message))
+{
+    <div class="alert alert-info">@ViewBag.Message</div>
+}
+
+@if (!string.IsNullOrEmpty(ViewBag.Error))
+{
+    <div class="alert alert-danger">
+        <strong>Error:</strong> @ViewBag.Error <br />
+        @ViewBag.Detail
+    </div>
+}
+else if (Model?.Search != null && Model.Search.Any())
+{
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var pelicula in Model.Search)
+        {
+            <div class="col">
+                <div class="card h-100">
+                    <img src="@pelicula.Poster" class="card-img-top" alt="@pelicula.Title" />
+                    <div class="card-body">
+                        <h5 class="card-title">@pelicula.Title</h5>
+                        <p class="card-text">@pelicula.Year (@pelicula.Type)</p>
+                        <a href="https://www.imdb.com/title/@pelicula.imdbID" class="btn btn-primary" target="_blank">Ver en IMDb</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Paginación -->
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            @if (currentPage > 1)
+            {
+                <li class="page-item">
+                    <a class="page-link" asp-action="Index" asp-route-titulo="@currentTitle" asp-route-pagina="@(currentPage - 1)">Anterior</a>
+                </li>
+            }
+
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                <li class="page-item @(i == currentPage ? "active" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-titulo="@currentTitle" asp-route-pagina="@i">@i</a>
+                </li>
+            }
+
+            @if (currentPage < totalPages)
+            {
+                <li class="page-item">
+                    <a class="page-link" asp-action="Index" asp-route-titulo="@currentTitle" asp-route-pagina="@(currentPage + 1)">Siguiente</a>
+                </li>
+            }
+        </ul>
+    </nav>
+}
+else
+{
+    <div class="alert alert-warning">No se encontraron películas.</div>
+}
